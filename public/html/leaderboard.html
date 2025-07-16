@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo - Leaderboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url(../images/land-bg.jpeg);
+            background-size: cover;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .leaderboard-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        .leaderboard-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .toggle-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .toggle-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .toggle-button.active {
+            background-color: #0056b3;
+        }
+        .toggle-button:hover {
+            background-color: #0056b3;
+        }
+        .leaderboard-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .leaderboard-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .leaderboard-list li:last-child {
+            border-bottom: none;
+        }
+        .back-button {
+            margin-top: 20px;
+        }
+        .back-button a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .back-button a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="leaderboard-container">
+        <div class="leaderboard-title">Leaderboard</div>
+        <div class="toggle-buttons">
+            <button class="toggle-button active" onclick="showWins()">By Wins</button>
+            <button class="toggle-button" onclick="showWinRate()">By Win Rate</button>
+        </div>
+        <ul class="leaderboard-list" id="wins-list"></ul>
+        <ul class="leaderboard-list" id="win-rate-list" style="display: none;"></ul>
+        <div class="back-button">
+            <a href="/">Back to Landing Page</a>
+        </div>
+    </div>
+
+    <script>
+        function showWins() {
+            document.getElementById('wins-list').style.display = 'block';
+            document.getElementById('win-rate-list').style.display = 'none';
+            document.querySelector('.toggle-buttons .toggle-button:first-child').classList.add('active');
+            document.querySelector('.toggle-buttons .toggle-button:last-child').classList.remove('active');
+            fetchLeaderboard('wins');
+        }
+
+        function showWinRate() {
+            document.getElementById('wins-list').style.display = 'none';
+            document.getElementById('win-rate-list').style.display = 'block';
+            document.querySelector('.toggle-buttons .toggle-button:first-child').classList.remove('active');
+            document.querySelector('.toggle-buttons .toggle-button:last-child').classList.add('active');
+            fetchLeaderboard('winRate');
+        }
+
+        function fetchLeaderboard(sortBy) {
+            fetch(`/api/leaderboard?sortBy=${sortBy}`)
+            .then(response => response.json())
+            .then(data => {
+                const listElement = sortBy === 'wins' ? document.getElementById('wins-list') : document.getElementById('win-rate-list');
+                listElement.innerHTML = '';
+                data.forEach(user => {
+                    const li = document.createElement('li');
+                    li.textContent = `${user.username} - ${sortBy === 'wins' ? user.wins : `${user.winRate}%`}`;
+                    listElement.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Fetch initial leaderboard data
+        fetchLeaderboard('wins');
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Ludo</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+            background-image: url(../images/land-bg.jpeg);
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        .title {
+            font-size: 120px;
+            color: #0087d5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .button {
+            padding: 15px 30px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            width: 200px;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        .top-right-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .top-right-button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .username-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .username-display:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+
+    </style>
+</head>
+<body>
+    <div id="top-right-button-container">
+        <button class="top-right-button" onclick="location.href='/login'">Signup/Login</button>
+    </div>
+    <div class="title">LUDO</div>
+    <button class="button" onclick="redirectToGame()">Play</button>
+    <button class="button" onclick="startOfflineGame()">Play Offline</button>
+    <div style="display: flex; justify-content: center; width: 100%;">
+        <button class="button" onclick="location.href='/leaderboard'">Leaderboard</button>
+        <button class="button" onclick="location.href='/gameprofile'">Game Profile</button>
+    </div>
+
+    <script>
+        function redirectToGame() {
+            // Check if the user is logged in
+            fetch('/api/check-login')
+            .then(response => response.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    window.location.href = '/game';
+                } else {
+                    window.location.href = '/login';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function startOfflineGame() {
+            // Redirect to the game page with a query parameter indicating offline mode
+            window.location.href = '/game?mode=offline';
+        }
+
+        // Check if the user is logged in and update the top-right button
+        fetch('/api/check-login')
+        .then(response => response.json())
+        .then(data => {
+            if (data.loggedIn) {
+                const logoutButton = document.createElement('button');
+                logoutButton.className = 'username-display';
+                logoutButton.textContent = 'Logout';
+                logoutButton.onclick = function() {
+                    if (confirm('Are you sure you want to log out?')) {
+                        fetch('/api/logout', { method: 'POST' })
+                            .then(() => window.location.href = '/login')
+                            .catch(error => console.error('Logout Error:', error));
+                    }
+                };
+                const container = document.getElementById('top-right-button-container');
+                container.innerHTML = '';
+                container.appendChild(logoutButton);
+            }
+        })
+        .catch(error => console.error('Check Login Error:', error));
+
+
+    </script>
+</body>
+</html>

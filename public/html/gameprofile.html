@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo - Game Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url(../images/land-bg.jpeg);
+            background-size: cover;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .profile-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        .profile-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .profile-info {
+            margin-bottom: 20px;
+        }
+        .profile-info p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .game-history {
+            list-style-type: none;
+            padding: 0;
+        }
+        .game-history li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .game-history li:last-child {
+            border-bottom: none;
+        }
+        .alert-message {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .back-button {
+            margin-top: 20px;
+        }
+        .back-button a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .back-button a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-title">Game Profile</div>
+        <div id="profile-content" style="display: none;">
+            <div class="profile-info" id="profile-info"></div>
+            <div class="game-history" id="game-history"></div>
+        </div>
+        <div class="alert-message" id="alert-message" style="display: none;">Please log in to view your game profile.</div>
+        <div class="back-button">
+            <a href="/">Back to Landing Page</a>
+        </div>
+    </div>
+
+    <script>
+        function fetchProfile() {
+            fetch('/api/profile')
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('profile-content').style.display = 'none';
+                    document.getElementById('alert-message').style.display = 'block';
+                    alert(data.message);
+                } else {
+                    document.getElementById('profile-content').style.display = 'block';
+                    document.getElementById('alert-message').style.display = 'none';
+                    document.getElementById('profile-info').innerHTML = `
+                        <p><strong>Username:</strong> ${data.username}</p>
+                        <p><strong>Wins:</strong> ${data.wins}</p>
+                        <p><strong>Games Played:</strong> ${data.gamesPlayed}</p>
+                    `;
+                    const gameHistory = document.getElementById('game-history');
+                    gameHistory.innerHTML = '';
+                    data.gameHistory.forEach(game => {
+                        const li = document.createElement('li');
+                        li.textContent = `Game ${game.id} - ${game.result}`;
+                        gameHistory.appendChild(li);
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Fetch initial profile data
+        fetchProfile();
+
+        // Check login status on page load
+        fetch('/api/check-login')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.loggedIn) {
+                window.location.href = '/login?redirect=/profile';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
